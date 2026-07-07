@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Fill the Bottle — Dhew Drinking Water</title>
+<meta name="description" content="Time your tap to fill the bottle perfectly — free one-tap game.">
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0a2540; --deep:#06223f; --brand-blue:#0f4f8a; --brand-blue-2:#1c6fb3;
+    --ice:#eaf6ff; --white:#ffffff;
+    --glass-border: rgba(255,255,255,0.35);
+    --shadow-card: 0 30px 80px -10px rgba(4,20,40,0.55), 0 8px 24px rgba(4,20,40,0.35);
+    --radius-lg: 28px; --radius-md: 18px; --maxw: 560px;
+    --good:#37d67a; --warn:#ffc857; --bad:#ff6b6b;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; width:100%; min-height:100%; }
+  body{
+    font-family:'Poppins', -apple-system, 'Segoe UI', sans-serif;
+    color:var(--white); background-color:#06223f; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .bg-wrap{ position:fixed; inset:0; z-index:0; overflow:hidden; }
+  .bg-img{ position:absolute; inset:0; width:100%; height:100%;
+    background: linear-gradient(160deg, #0a5a9e 0%, #024372 45%, #011e3a 100%); background-color:#024372; }
+  .bg-overlay{ position:absolute; inset:0;
+    background: radial-gradient(ellipse 80% 60% at 25% 30%, rgba(15,90,160,0.22) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 50% at 80% 70%, rgba(1,30,65,0.28) 0%, transparent 65%); }
+  .bg-vignette{ position:absolute; inset:0; box-shadow: inset 0 0 180px 40px rgba(1,12,28,0.45); }
+
+  .page{ position:relative; z-index:1; min-height:100vh; width:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:36px 20px 40px; }
+
+  .back-link{ align-self:flex-start; display:inline-flex; align-items:center; gap:6px;
+    color:rgba(234,246,255,0.75); text-decoration:none; font-size:13px; font-weight:500;
+    margin-bottom:18px; max-width:var(--maxw); width:100%; }
+  .back-link svg{ width:16px; height:16px; }
+  .back-link:hover{ color:#fff; }
+
+  .header{ text-align:center; max-width:640px; margin-bottom:20px; }
+  .brand-name{ font-size:clamp(11px, 3.8vw, 16px); font-weight:500; letter-spacing:0.18em; margin:0; color:rgba(255,255,255,0.72); }
+  .subtitle{ font-size:clamp(19px, 4vw, 25px); font-weight:700; margin:8px 0 8px; color:var(--ice); }
+  .lead-text{ font-size:clamp(13px, 2vw, 15px); font-weight:300; line-height:1.6; margin:0 auto; max-width:420px; color:rgba(234,246,255,0.85); }
+
+  .card{ width:100%; max-width:var(--maxw);
+    background:linear-gradient(165deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+    border:1px solid var(--glass-border); border-radius:var(--radius-lg);
+    backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%);
+    box-shadow:var(--shadow-card); padding:clamp(24px, 5vw, 34px); position:relative; overflow:hidden; }
+  .card::before{ content:""; position:absolute; top:-40%; left:-20%; width:70%; height:70%;
+    background:radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%); pointer-events:none; }
+
+  .stat-row{ display:flex; justify-content:center; gap:22px; margin-bottom:22px; }
+  .stat{ text-align:center; }
+  .stat .num{ font-size:20px; font-weight:700; color:#fff; display:block; }
+  .stat .lbl{ font-size:11px; font-weight:400; color:rgba(234,246,255,0.65); letter-spacing:0.04em; text-transform:uppercase; }
+
+  .bottle-stage{ display:flex; align-items:flex-end; justify-content:center; gap:26px; margin-bottom:26px; }
+
+  .bottle-shell{
+    position:relative; width:90px; height:170px;
+  }
+  .bottle-neck{
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:26px; height:16px; background:rgba(255,255,255,0.35);
+    border-radius:4px 4px 0 0;
+  }
+  .bottle-body{
+    position:absolute; top:14px; left:0; right:0; bottom:0;
+    border-radius:16px;
+    border:2px solid rgba(255,255,255,0.5);
+    background:rgba(255,255,255,0.06);
+    overflow:hidden;
+  }
+  .bottle-fill{
+    position:absolute; left:0; right:0; bottom:0; height:0%;
+    background:linear-gradient(180deg, #6cc8ff, #1c6fb3);
+    transition:height 0.6s cubic-bezier(.34,1.56,.64,1);
+  }
+  .bottle-fill::before{
+    content:""; position:absolute; top:-6px; left:0; right:0; height:10px;
+    background:rgba(255,255,255,0.35); border-radius:50%;
+  }
+  .bottle-pct{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:700; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.5); z-index:2;
+  }
+
+  .round-info{ text-align:center; }
+  .round-info .rnum{ font-size:26px; font-weight:800; color:#fff; }
+  .round-info .rlbl{ font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:rgba(234,246,255,0.6); }
+  .feedback{
+    margin-top:8px; font-size:13px; font-weight:600; min-height:18px; text-align:center;
+  }
+
+  .gauge-track{
+    position:relative; width:100%; height:30px; border-radius:15px;
+    background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25);
+    overflow:hidden; margin-bottom:22px; cursor:pointer;
+  }
+  .gauge-target{
+    position:absolute; top:0; bottom:0; background:rgba(55,214,122,0.45);
+    border-left:2px solid rgba(55,214,122,0.9); border-right:2px solid rgba(55,214,122,0.9);
+  }
+  .gauge-pointer{
+    position:absolute; top:-3px; bottom:-3px; width:4px; border-radius:2px;
+    background:#ffffff; box-shadow:0 0 10px rgba(255,255,255,0.8);
+  }
+
+  .overlay{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:10px; background:rgba(6,34,63,0.88); backdrop-filter:blur(6px);
+    text-align:center; padding:24px; z-index:5; border-radius:inherit;
+  }
+  .overlay .icon{ font-size:38px; }
+  .overlay .title{ font-size:20px; font-weight:700; color:#fff; }
+  .overlay .sub{ font-size:13px; color:rgba(234,246,255,0.85); font-weight:300; max-width:280px; }
+  .overlay.hidden{ display:none; }
+
+  .tap-btn{
+    width:100%; padding:15px; border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.55);
+    background:linear-gradient(135deg, #ffffff, #f3faff); color:var(--deep); text-decoration:none;
+    font-family:inherit; font-weight:700; font-size:15px; cursor:pointer;
+    box-shadow:0 10px 24px rgba(4,18,36,0.28); transition:transform 0.15s ease;
+  }
+  .tap-btn:active{ transform:scale(0.97); }
+
+  .controls{ display:flex; gap:12px; margin-top:16px; }
+  .btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:13px 16px;
+    border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.35);
+    background:rgba(255,255,255,0.10); color:#fff; text-decoration:none;
+    font-family:inherit; font-weight:600; font-size:14px; cursor:pointer; transition:transform 0.2s ease; }
+  .btn:hover{ transform:translateY(-2px); }
+
+  .card-note{ text-align:center; font-size:12px; font-weight:300; line-height:1.6; color:rgba(234,246,255,0.65);
+    margin:20px 0 0; padding-top:16px; border-top:1px solid rgba(255,255,255,0.18); }
+
+  .footer{ margin-top:30px; text-align:center; font-size:12px; font-weight:300; letter-spacing:0.02em;
+    color:rgba(234,246,255,0.55); line-height:1.7; }
+  .footer strong{ font-weight:600; color:rgba(255,255,255,0.8); }
+</style>
+</head>
+<body>
+
+  <div class="bg-wrap" aria-hidden="true">
+    <div class="bg-img"></div>
+    <div class="bg-overlay"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <main class="page">
+
+    <a class="back-link" href="games.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Back to games
+    </a>
+
+    <header class="header">
+      <p class="brand-name">DHEW DRINKING WATER</p>
+      <h1 class="subtitle">🍼 Fill the Bottle</h1>
+      <p class="lead-text">Tap when the moving marker is inside the green zone. 5 rounds — time it right to fill the bottle perfectly.</p>
+    </header>
+
+    <section class="card" aria-label="Fill the Bottle timing game" id="cardArea" style="position:relative;">
+
+      <div class="stat-row">
+        <div class="stat"><span class="num" id="scoreLabel">0%</span><span class="lbl">Filled</span></div>
+        <div class="stat"><span class="num" id="roundLabel">1/5</span><span class="lbl">Round</span></div>
+      </div>
+
+      <div class="bottle-stage">
+        <div class="bottle-shell">
+          <div class="bottle-neck"></div>
+          <div class="bottle-body">
+            <div class="bottle-fill" id="bottleFill"></div>
+            <div class="bottle-pct" id="bottlePct">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feedback" id="feedback">&nbsp;</div>
+
+      <div class="gauge-track" id="gaugeTrack">
+        <div class="gauge-target" id="gaugeTarget"></div>
+        <div class="gauge-pointer" id="gaugePointer"></div>
+      </div>
+
+      <button class="tap-btn" id="tapBtn">Tap to Stop</button>
+
+      <div class="controls">
+        <a class="btn" href="games.html">More Games</a>
+      </div>
+
+      <p class="card-note">Each round the green zone gets a little trickier. Aim for Platinum!</p>
+
+      <div class="overlay hidden" id="startOverlay">
+        <div class="icon">🍼</div>
+        <div class="title">Ready to fill up?</div>
+        <div class="sub">5 rounds. Tap when the white marker is inside the green zone.</div>
+        <button class="tap-btn" id="startBtn" style="max-width:200px;">Start</button>
+      </div>
+
+      <div class="overlay hidden" id="endOverlay">
+        <div class="icon" id="endIcon">🏆</div>
+        <div class="title" id="endTitle">Gold!</div>
+        <div class="sub" id="endSub">Bottle filled to 80%.</div>
+        <button class="tap-btn" id="restartBtn" style="max-width:200px;">Play Again</button>
+      </div>
+
+    </section>
+
+    <footer class="footer">
+      <strong>&copy; Dhew Drinking Water</strong><br>
+      Laboratory Tested Drinking Water
+    </footer>
+
+  </main>
+
+  <script>
+  (function(){
+    const track = document.getElementById('gaugeTrack');
+    const targetEl = document.getElementById('gaugeTarget');
+    const pointerEl = document.getElementById('gaugePointer');
+    const tapBtn = document.getElementById('tapBtn');
+    const feedback = document.getElementById('feedback');
+    const bottleFill = document.getElementById('bottleFill');
+    const bottlePct = document.getElementById('bottlePct');
+    const scoreLabel = document.getElementById('scoreLabel');
+    const roundLabel = document.getElementById('roundLabel');
+    const startOverlay = document.getElementById('startOverlay');
+    const endOverlay = document.getElementById('endOverlay');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const endIcon = document.getElementById('endIcon');
+    const endTitle = document.getElementById('endTitle');
+    const endSub = document.getElementById('endSub');
+
+    const TOTAL_ROUNDS = 5;
+    let round = 0;
+    let totalFill = 0;
+    let pointerPos = 0; // 0-100
+    let direction = 1;
+    let speed = 1.6; // percent per frame baseline
+    let running = false;
+    let locked = false;
+    let rafId = null;
+    let targetStart = 40, targetWidth = 22;
+
+    function trackWidth(){ return track.getBoundingClientRect().width; }
+
+    function setupRound(){
+      targetWidth = Math.max(10, 24 - round * 3); // shrinks each round
+      targetStart = 8 + Math.random() * (92 - targetWidth - 8);
+      speed = 1.5 + round * 0.35;
+      direction = Math.random() < 0.5 ? 1 : -1;
+      pointerPos = Math.random() * 100;
+      locked = false;
+      targetEl.style.left = targetStart + '%';
+      targetEl.style.width = targetWidth + '%';
+      roundLabel.textContent = (round + 1) + '/' + TOTAL_ROUNDS;
+      feedback.textContent = '\u00a0';
+      tapBtn.disabled = false;
+      tapBtn.textContent = 'Tap to Stop';
+    }
+
+    function animate(){
+      if(!running || locked){ return; }
+      pointerPos += direction * speed * 0.35;
+      if(pointerPos >= 100){ pointerPos = 100; direction = -1; }
+      if(pointerPos <= 0){ pointerPos = 0; direction = 1; }
+      pointerEl.style.left = pointerPos + '%';
+      rafId = requestAnimationFrame(animate);
+    }
+
+    function evaluate(){
+      locked = true;
+      cancelAnimationFrame(rafId);
+      const center = targetStart + targetWidth/2;
+      const dist = Math.abs(pointerPos - center);
+      const halfW = targetWidth/2;
+      let gain = 0;
+      let msg = '';
+      let color = '';
+      if(dist <= halfW * 0.35){
+        gain = 20; msg = 'Perfect! 💯'; color = 'var(--good)';
+      } else if(dist <= halfW){
+        gain = 12; msg = 'Good catch!'; color = 'var(--warn)';
+      } else if(dist <= halfW * 1.6){
+        gain = 5; msg = 'Close, a little spilled.'; color = 'var(--warn)';
+      } else {
+        gain = 0; msg = 'Missed the zone!'; color = 'var(--bad)';
+      }
+      totalFill = Math.min(100, totalFill + gain);
+      feedback.style.color = color;
+      feedback.textContent = msg;
+      bottleFill.style.height = totalFill + '%';
+      bottlePct.textContent = Math.round(totalFill) + '%';
+      scoreLabel.textContent = Math.round(totalFill) + '%';
+      tapBtn.disabled = true;
+
+      setTimeout(() => {
+        round++;
+        if(round >= TOTAL_ROUNDS){
+          finishGame();
+        } else {
+          setupRound();
+          running = true;
+          rafId = requestAnimationFrame(animate);
+        }
+      }, 900);
+    }
+
+    function finishGame(){
+      running = false;
+      let icon, title;
+      if(totalFill >= 90){ icon = '🏆'; title = 'Platinum!'; }
+      else if(totalFill >= 70){ icon = '🥇'; title = 'Gold!'; }
+      else if(totalFill >= 50){ icon = '🥈'; title = 'Silver!'; }
+      else { icon = '🥉'; title = 'Bronze'; }
+      endIcon.textContent = icon;
+      endTitle.textContent = title;
+      endSub.textContent = 'Bottle filled to ' + Math.round(totalFill) + '%.';
+      endOverlay.classList.remove('hidden');
+    }
+
+    function startGame(){
+      round = 0;
+      totalFill = 0;
+      bottleFill.style.height = '0%';
+      bottlePct.textContent = '0%';
+      scoreLabel.textContent = '0%';
+      startOverlay.classList.add('hidden');
+      endOverlay.classList.add('hidden');
+      setupRound();
+      running = true;
+      rafId = requestAnimationFrame(animate);
+    }
+
+    tapBtn.addEventListener('click', () => {
+      if(!running || locked) return;
+      evaluate();
+    });
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
+
+    // show start overlay initially
+    startOverlay.classList.remove('hidden');
+  })();
+  </script>
+
+</body>
+</html>

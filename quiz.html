@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Purity Quiz — Dhew Drinking Water</title>
+<meta name="description" content="Test your water quality knowledge — free one-tap quiz.">
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0a2540; --deep:#06223f; --brand-blue:#0f4f8a; --brand-blue-2:#1c6fb3;
+    --ice:#eaf6ff; --white:#ffffff;
+    --glass-border: rgba(255,255,255,0.35);
+    --shadow-card: 0 30px 80px -10px rgba(4,20,40,0.55), 0 8px 24px rgba(4,20,40,0.35);
+    --radius-lg: 28px; --radius-md: 18px; --maxw: 560px;
+    --good:#37d67a; --bad:#ff6b6b;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; width:100%; min-height:100%; }
+  body{
+    font-family:'Poppins', -apple-system, 'Segoe UI', sans-serif;
+    color:var(--white); background-color:#06223f; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .bg-wrap{ position:fixed; inset:0; z-index:0; overflow:hidden; }
+  .bg-img{ position:absolute; inset:0; width:100%; height:100%;
+    background: linear-gradient(160deg, #0a5a9e 0%, #024372 45%, #011e3a 100%); background-color:#024372; }
+  .bg-overlay{ position:absolute; inset:0;
+    background: radial-gradient(ellipse 80% 60% at 25% 30%, rgba(15,90,160,0.22) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 50% at 80% 70%, rgba(1,30,65,0.28) 0%, transparent 65%); }
+  .bg-vignette{ position:absolute; inset:0; box-shadow: inset 0 0 180px 40px rgba(1,12,28,0.45); }
+
+  .page{ position:relative; z-index:1; min-height:100vh; width:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:36px 20px 40px; }
+
+  .back-link{ align-self:flex-start; display:inline-flex; align-items:center; gap:6px;
+    color:rgba(234,246,255,0.75); text-decoration:none; font-size:13px; font-weight:500;
+    margin-bottom:18px; max-width:var(--maxw); width:100%; }
+  .back-link svg{ width:16px; height:16px; }
+  .back-link:hover{ color:#fff; }
+
+  .header{ text-align:center; max-width:640px; margin-bottom:20px; }
+  .brand-name{ font-size:clamp(11px, 3.8vw, 16px); font-weight:500; letter-spacing:0.18em; margin:0; color:rgba(255,255,255,0.72); }
+  .subtitle{ font-size:clamp(19px, 4vw, 25px); font-weight:700; margin:8px 0 8px; color:var(--ice); }
+  .lead-text{ font-size:clamp(13px, 2vw, 15px); font-weight:300; line-height:1.6; margin:0 auto; max-width:420px; color:rgba(234,246,255,0.85); }
+
+  .card{ width:100%; max-width:var(--maxw);
+    background:linear-gradient(165deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+    border:1px solid var(--glass-border); border-radius:var(--radius-lg);
+    backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%);
+    box-shadow:var(--shadow-card); padding:clamp(24px, 5vw, 34px); position:relative; overflow:hidden; }
+  .card::before{ content:""; position:absolute; top:-40%; left:-20%; width:70%; height:70%;
+    background:radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%); pointer-events:none; }
+
+  .progress-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; font-size:12px; color:rgba(234,246,255,0.75); letter-spacing:0.03em; }
+  .progress-track{ position:relative; width:100%; height:6px; border-radius:4px; background:rgba(255,255,255,0.15); margin-bottom:22px; overflow:hidden; }
+  .progress-bar{ position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg, #1c6fb3, #6cc8ff); transition:width 0.4s ease; }
+
+  .question-text{ font-size:17px; font-weight:600; line-height:1.5; margin-bottom:20px; color:#fff; min-height:50px; }
+
+  .options{ display:flex; flex-direction:column; gap:11px; margin-bottom:6px; }
+  .option-btn{
+    text-align:left; width:100%; padding:14px 16px; border-radius:14px;
+    border:1px solid rgba(255,255,255,0.35); background:rgba(255,255,255,0.08);
+    color:#fff; font-family:inherit; font-size:14px; font-weight:500; cursor:pointer;
+    transition:background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  }
+  .option-btn:hover:not(:disabled){ background:rgba(255,255,255,0.16); transform:translateY(-1px); }
+  .option-btn:disabled{ cursor:default; }
+  .option-btn.correct{ background:rgba(55,214,122,0.28); border-color:var(--good); }
+  .option-btn.wrong{ background:rgba(255,107,107,0.28); border-color:var(--bad); }
+
+  .explain{
+    margin-top:16px; font-size:13px; line-height:1.6; font-weight:300;
+    color:rgba(234,246,255,0.85); background:rgba(255,255,255,0.06);
+    border-radius:14px; padding:14px 16px; display:none;
+  }
+  .explain.show{ display:block; }
+
+  .next-btn{
+    width:100%; margin-top:18px; padding:14px; border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.55);
+    background:linear-gradient(135deg, #ffffff, #f3faff); color:var(--deep); text-decoration:none;
+    font-family:inherit; font-weight:700; font-size:14.5px; cursor:pointer;
+    box-shadow:0 10px 24px rgba(4,18,36,0.28); display:none;
+  }
+  .next-btn.show{ display:block; }
+
+  .result-wrap{ display:none; text-align:center; }
+  .result-wrap.show{ display:block; }
+  .result-icon{ font-size:46px; margin-bottom:6px; }
+  .result-title{ font-size:22px; font-weight:800; margin-bottom:6px; }
+  .result-sub{ font-size:14px; font-weight:300; color:rgba(234,246,255,0.85); margin-bottom:22px; }
+  .result-score{ font-size:15px; font-weight:600; margin-bottom:22px; color:#fff; }
+
+  .quiz-body{ display:block; }
+  .quiz-body.hide{ display:none; }
+
+  .controls{ display:flex; gap:12px; margin-top:8px; }
+  .btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:13px 16px;
+    border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.55);
+    background:linear-gradient(135deg, #ffffff, #f3faff); color:var(--deep); text-decoration:none;
+    font-family:inherit; font-weight:600; font-size:14px; cursor:pointer;
+    box-shadow:0 10px 24px rgba(4,18,36,0.28); transition:transform 0.22s ease; }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn.ghost{ background:rgba(255,255,255,0.10); color:#fff; border:1px solid rgba(255,255,255,0.35); }
+
+  .card-note{ text-align:center; font-size:12px; font-weight:300; line-height:1.6; color:rgba(234,246,255,0.65);
+    margin:20px 0 0; padding-top:16px; border-top:1px solid rgba(255,255,255,0.18); }
+
+  .footer{ margin-top:30px; text-align:center; font-size:12px; font-weight:300; letter-spacing:0.02em;
+    color:rgba(234,246,255,0.55); line-height:1.7; }
+  .footer strong{ font-weight:600; color:rgba(255,255,255,0.8); }
+</style>
+</head>
+<body>
+
+  <div class="bg-wrap" aria-hidden="true">
+    <div class="bg-img"></div>
+    <div class="bg-overlay"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <main class="page">
+
+    <a class="back-link" href="games.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Back to games
+    </a>
+
+    <header class="header">
+      <p class="brand-name">DHEW DRINKING WATER</p>
+      <h1 class="subtitle">✅ Purity Quiz</h1>
+      <p class="lead-text">7 quick questions about water quality. Free to play, learn as you go.</p>
+    </header>
+
+    <section class="card" aria-label="Purity quiz game">
+
+      <div class="quiz-body" id="quizBody">
+        <div class="progress-row">
+          <span id="qCounter">Question 1/7</span>
+          <span id="qScoreLive">Score: 0</span>
+        </div>
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+
+        <div class="question-text" id="questionText"></div>
+        <div class="options" id="optionsWrap"></div>
+        <div class="explain" id="explainBox"></div>
+        <button class="next-btn" id="nextBtn">Next Question</button>
+      </div>
+
+      <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">💧</div>
+        <div class="result-title" id="resultTitle">Well Informed</div>
+        <div class="result-sub" id="resultSub">You know your water quality basics.</div>
+        <div class="result-score" id="resultScore">Score: 0/7</div>
+        <div class="controls">
+          <button class="btn" id="retryBtn">Retry Quiz</button>
+          <a class="btn ghost" href="games.html">More Games</a>
+        </div>
+      </div>
+
+      <p class="card-note" id="cardNote">These are general water-quality facts for learning purposes.</p>
+
+    </section>
+
+    <footer class="footer">
+      <strong>&copy; Dhew Drinking Water</strong><br>
+      Laboratory Tested Drinking Water
+    </footer>
+
+  </main>
+
+  <script>
+  (function(){
+    const questions = [
+      {
+        q: "What does \"TDS\" stand for in water quality testing?",
+        options: ["Total Dissolved Solids", "Total Drinking Standard", "Toxic Detection System", "Treated Distribution Source"],
+        correct: 0,
+        explain: "TDS (Total Dissolved Solids) measures the combined content of minerals and salts dissolved in water, usually in mg/L (ppm)."
+      },
+      {
+        q: "Which of these is a traditional, widely-used method to make water safer to drink?",
+        options: ["Freezing it solid", "Boiling it", "Microwaving the bottle", "Shaking it vigorously"],
+        correct: 1,
+        explain: "Boiling water for a sustained period kills most disease-causing microorganisms, making it one of the oldest and most reliable purification methods."
+      },
+      {
+        q: "What pH range is generally considered ideal for drinking water?",
+        options: ["0 – 2", "6.5 – 8.5", "10 – 12", "13 – 14"],
+        correct: 1,
+        explain: "Most health guidelines consider a pH between 6.5 and 8.5 as the safe, near-neutral range for drinking water."
+      },
+      {
+        q: "Which purification process forces water through a very fine membrane to remove impurities at a molecular level?",
+        options: ["Reverse Osmosis", "Carbonation", "Pasteurization", "Homogenization"],
+        correct: 0,
+        explain: "Reverse Osmosis (RO) pushes water through a semi-permeable membrane, filtering out dissolved salts, contaminants, and many microorganisms."
+      },
+      {
+        q: "Why do quality drinking water brands send their water for lab testing?",
+        options: ["To add flavor", "To verify it's free of harmful contaminants and safe to drink", "To make it colder", "To increase its price"],
+        correct: 1,
+        explain: "Independent lab testing confirms chemical and microbiological safety, which is the whole point of publishing test reports for customers."
+      },
+      {
+        q: "Which of these should NOT be present in properly treated drinking water?",
+        options: ["Trace minerals", "Harmful bacteria like E. coli", "Dissolved oxygen", "A safe, approved level of disinfectant"],
+        correct: 1,
+        explain: "Harmful bacteria such as E. coli indicate contamination and should never be present in water that's safe to drink."
+      },
+      {
+        q: "How often should a responsible water supplier test its water quality?",
+        options: ["Never", "Only once, when the plant opens", "Regularly, on an ongoing basis", "Only if a customer complains"],
+        correct: 2,
+        explain: "Regular, ongoing testing is what keeps a water supply consistently safe — quality can change over time, so it isn't a one-time check."
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let answered = false;
+
+    const qCounter = document.getElementById('qCounter');
+    const qScoreLive = document.getElementById('qScoreLive');
+    const progressBar = document.getElementById('progressBar');
+    const questionText = document.getElementById('questionText');
+    const optionsWrap = document.getElementById('optionsWrap');
+    const explainBox = document.getElementById('explainBox');
+    const nextBtn = document.getElementById('nextBtn');
+    const quizBody = document.getElementById('quizBody');
+    const resultWrap = document.getElementById('resultWrap');
+    const resultIcon = document.getElementById('resultIcon');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultSub = document.getElementById('resultSub');
+    const resultScore = document.getElementById('resultScore');
+    const retryBtn = document.getElementById('retryBtn');
+    const cardNote = document.getElementById('cardNote');
+
+    function renderQuestion(){
+      answered = false;
+      const item = questions[current];
+      qCounter.textContent = 'Question ' + (current+1) + '/' + questions.length;
+      qScoreLive.textContent = 'Score: ' + score;
+      progressBar.style.width = ((current)/questions.length*100) + '%';
+      questionText.textContent = item.q;
+      explainBox.classList.remove('show');
+      explainBox.textContent = '';
+      nextBtn.classList.remove('show');
+
+      optionsWrap.innerHTML = '';
+      item.options.forEach((opt, idx) => {
+        const b = document.createElement('button');
+        b.className = 'option-btn';
+        b.textContent = opt;
+        b.addEventListener('click', () => selectOption(idx));
+        optionsWrap.appendChild(b);
+      });
+    }
+
+    function selectOption(idx){
+      if(answered) return;
+      answered = true;
+      const item = questions[current];
+      const buttons = optionsWrap.querySelectorAll('.option-btn');
+      buttons.forEach((b, i) => {
+        b.disabled = true;
+        if(i === item.correct) b.classList.add('correct');
+        else if(i === idx) b.classList.add('wrong');
+      });
+      if(idx === item.correct) score++;
+      qScoreLive.textContent = 'Score: ' + score;
+      explainBox.textContent = item.explain;
+      explainBox.classList.add('show');
+      nextBtn.classList.add('show');
+      progressBar.style.width = ((current+1)/questions.length*100) + '%';
+    }
+
+    function nextQuestion(){
+      current++;
+      if(current >= questions.length){
+        showResults();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    function showResults(){
+      quizBody.classList.add('hide');
+      resultWrap.classList.add('show');
+      cardNote.style.display = 'none';
+      resultScore.textContent = 'Score: ' + score + '/' + questions.length;
+      let icon, title, sub;
+      if(score === questions.length){ icon='🏆'; title='Water Expert!'; sub='Perfect score — you really know your water quality facts.'; }
+      else if(score >= 5){ icon='💧'; title='Well Informed'; sub='Solid grasp of water quality basics.'; }
+      else if(score >= 3){ icon='🙂'; title='Getting There'; sub='A decent start — a few facts to brush up on.'; }
+      else { icon='📘'; title='Keep Learning'; sub='Give it another go and see how much you pick up.'; }
+      resultIcon.textContent = icon;
+      resultTitle.textContent = title;
+      resultSub.textContent = sub;
+    }
+
+    function restart(){
+      current = 0;
+      score = 0;
+      quizBody.classList.remove('hide');
+      resultWrap.classList.remove('show');
+      cardNote.style.display = '';
+      renderQuestion();
+    }
+
+    nextBtn.addEventListener('click', nextQuestion);
+    retryBtn.addEventListener('click', restart);
+
+    renderQuestion();
+  })();
+  </script>
+
+</body>
+</html>

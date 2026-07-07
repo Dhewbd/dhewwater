@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Water Drop Catcher — Dhew Drinking Water</title>
+<meta name="description" content="Catch the clean water drops and avoid the dirty ones — free one-tap game.">
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0a2540; --deep:#06223f; --brand-blue:#0f4f8a; --brand-blue-2:#1c6fb3;
+    --ice:#eaf6ff; --white:#ffffff;
+    --glass-border: rgba(255,255,255,0.35);
+    --shadow-card: 0 30px 80px -10px rgba(4,20,40,0.55), 0 8px 24px rgba(4,20,40,0.35);
+    --radius-lg: 28px; --radius-md: 18px; --maxw: 560px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; width:100%; min-height:100%; }
+  body{
+    font-family:'Poppins', -apple-system, 'Segoe UI', sans-serif;
+    color:var(--white); background-color:#06223f; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .bg-wrap{ position:fixed; inset:0; z-index:0; overflow:hidden; }
+  .bg-img{ position:absolute; inset:0; width:100%; height:100%;
+    background: linear-gradient(160deg, #0a5a9e 0%, #024372 45%, #011e3a 100%); background-color:#024372; }
+  .bg-overlay{ position:absolute; inset:0;
+    background: radial-gradient(ellipse 80% 60% at 25% 30%, rgba(15,90,160,0.22) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 50% at 80% 70%, rgba(1,30,65,0.28) 0%, transparent 65%); }
+  .bg-vignette{ position:absolute; inset:0; box-shadow: inset 0 0 180px 40px rgba(1,12,28,0.45); }
+
+  .page{ position:relative; z-index:1; min-height:100vh; width:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:36px 20px 40px; }
+
+  .back-link{ align-self:flex-start; display:inline-flex; align-items:center; gap:6px;
+    color:rgba(234,246,255,0.75); text-decoration:none; font-size:13px; font-weight:500;
+    margin-bottom:18px; max-width:var(--maxw); width:100%; }
+  .back-link svg{ width:16px; height:16px; }
+  .back-link:hover{ color:#fff; }
+
+  .header{ text-align:center; max-width:640px; margin-bottom:20px; }
+  .brand-name{ font-size:clamp(11px, 3.8vw, 16px); font-weight:500; letter-spacing:0.18em; margin:0; color:rgba(255,255,255,0.72); }
+  .subtitle{ font-size:clamp(19px, 4vw, 25px); font-weight:700; margin:8px 0 8px; color:var(--ice); }
+  .lead-text{ font-size:clamp(13px, 2vw, 15px); font-weight:300; line-height:1.6; margin:0 auto; max-width:420px; color:rgba(234,246,255,0.85); }
+
+  .card{ width:100%; max-width:var(--maxw);
+    background:linear-gradient(165deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+    border:1px solid var(--glass-border); border-radius:var(--radius-lg);
+    backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%);
+    box-shadow:var(--shadow-card); padding:clamp(22px, 5vw, 32px); position:relative; overflow:hidden; }
+  .card::before{ content:""; position:absolute; top:-40%; left:-20%; width:70%; height:70%;
+    background:radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%); pointer-events:none; }
+
+  .stat-row{ display:flex; justify-content:center; gap:22px; margin-bottom:16px; }
+  .stat{ text-align:center; }
+  .stat .num{ font-size:20px; font-weight:700; color:#fff; display:block; }
+  .stat .lbl{ font-size:11px; font-weight:400; color:rgba(234,246,255,0.65); letter-spacing:0.04em; text-transform:uppercase; }
+  .lives{ font-size:18px; letter-spacing:2px; }
+
+  .game-wrap{
+    position:relative; width:100%; max-width:400px; aspect-ratio:3/4; margin:0 auto;
+    border-radius:var(--radius-md); overflow:hidden;
+    box-shadow:0 14px 40px rgba(2,14,30,0.5), inset 0 0 0 1px rgba(255,255,255,0.25);
+    background:linear-gradient(180deg, #0a5a9e 0%, #024372 55%, #011e3a 100%);
+    touch-action: none;
+  }
+  #gameCanvas{ display:block; width:100%; height:100%; }
+
+  .overlay{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:12px; background:rgba(6,34,63,0.82); backdrop-filter:blur(6px);
+    text-align:center; padding:24px; z-index:2;
+  }
+  .overlay .icon{ font-size:40px; }
+  .overlay .title{ font-size:21px; font-weight:700; color:#fff; }
+  .overlay .sub{ font-size:13px; color:rgba(234,246,255,0.85); font-weight:300; max-width:260px; }
+  .overlay.hidden{ display:none; }
+
+  .controls{ display:flex; gap:12px; margin-top:20px; }
+  .btn{ flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:13px 16px;
+    border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.55);
+    background:linear-gradient(135deg, #ffffff, #f3faff); color:var(--deep); text-decoration:none;
+    font-family:inherit; font-weight:600; font-size:14px; cursor:pointer;
+    box-shadow:0 10px 24px rgba(4,18,36,0.28); transition:transform 0.22s ease, box-shadow 0.22s ease; }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(4,18,36,0.35); }
+  .btn:active{ transform:translateY(0) scale(0.98); }
+  .btn.ghost{ background:rgba(255,255,255,0.10); color:#fff; border:1px solid rgba(255,255,255,0.35); }
+
+  .card-note{ text-align:center; font-size:12px; font-weight:300; line-height:1.6; color:rgba(234,246,255,0.65);
+    margin:22px 0 0; padding-top:16px; border-top:1px solid rgba(255,255,255,0.18); }
+
+  .footer{ margin-top:30px; text-align:center; font-size:12px; font-weight:300; letter-spacing:0.02em;
+    color:rgba(234,246,255,0.55); line-height:1.7; }
+  .footer strong{ font-weight:600; color:rgba(255,255,255,0.8); }
+</style>
+</head>
+<body>
+
+  <div class="bg-wrap" aria-hidden="true">
+    <div class="bg-img"></div>
+    <div class="bg-overlay"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <main class="page">
+
+    <a class="back-link" href="games.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Back to games
+    </a>
+
+    <header class="header">
+      <p class="brand-name">DHEW DRINKING WATER</p>
+      <h1 class="subtitle">💧 Water Drop Catcher</h1>
+      <p class="lead-text">Drag to move the bottle. Catch the clear drops, dodge the dirty ones. Free to play.</p>
+    </header>
+
+    <section class="card" aria-label="Water Drop Catcher game">
+
+      <div class="stat-row">
+        <div class="stat"><span class="num" id="scoreCount">0</span><span class="lbl">Score</span></div>
+        <div class="stat"><span class="num lives" id="livesCount">❤❤❤</span><span class="lbl">Lives</span></div>
+      </div>
+
+      <div class="game-wrap" id="gameWrap">
+        <canvas id="gameCanvas" width="400" height="533"></canvas>
+
+        <div class="overlay" id="startOverlay">
+          <div class="icon">💧</div>
+          <div class="title">Ready?</div>
+          <div class="sub">Drag left/right anywhere on the board to move the bottle.</div>
+          <button class="btn" id="startBtn" style="margin-top:6px; max-width:180px;">Start Game</button>
+        </div>
+
+        <div class="overlay hidden" id="endOverlay">
+          <div class="icon">🏁</div>
+          <div class="title">Game Over</div>
+          <div class="sub" id="endSub">You caught 0 drops.</div>
+          <button class="btn" id="restartBtn" style="margin-top:6px; max-width:180px;">Play Again</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <a class="btn ghost" href="games.html">More Games</a>
+      </div>
+
+      <p class="card-note">Tip: clean drops are light blue, dirty drops are murky brown — only catch the clean ones!</p>
+
+    </section>
+
+    <footer class="footer">
+      <strong>&copy; Dhew Drinking Water</strong><br>
+      Laboratory Tested Drinking Water
+    </footer>
+
+  </main>
+
+  <script>
+  (function(){
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const wrap = document.getElementById('gameWrap');
+    const startOverlay = document.getElementById('startOverlay');
+    const endOverlay = document.getElementById('endOverlay');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const scoreCountEl = document.getElementById('scoreCount');
+    const livesCountEl = document.getElementById('livesCount');
+    const endSub = document.getElementById('endSub');
+
+    let W = 400, H = 533;
+    let dpr = window.devicePixelRatio || 1;
+
+    let bottle = { x: W/2, w: 64, h: 44 };
+    let drops = [];
+    let score = 0;
+    let lives = 3;
+    let running = false;
+    let spawnTimer = 0;
+    let spawnInterval = 70; // frames
+    let elapsedFrames = 0;
+    let rafId = null;
+
+    function resize(){
+      const rect = wrap.getBoundingClientRect();
+      W = rect.width; H = rect.height;
+      dpr = window.devicePixelRatio || 1;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      bottle.x = Math.min(Math.max(bottle.x, bottle.w/2), W - bottle.w/2);
+    }
+
+    function resetGame(){
+      drops = [];
+      score = 0;
+      lives = 3;
+      spawnTimer = 0;
+      spawnInterval = 70;
+      elapsedFrames = 0;
+      bottle.x = W/2;
+      scoreCountEl.textContent = '0';
+      livesCountEl.textContent = '❤❤❤';
+    }
+
+    function spawnDrop(){
+      const bad = Math.random() < 0.28;
+      drops.push({
+        x: 20 + Math.random() * (W - 40),
+        y: -20,
+        r: bad ? 12 : 11,
+        speed: 2 + Math.random() * 1.6 + elapsedFrames / 2200,
+        bad: bad
+      });
+    }
+
+    function drawBottle(){
+      const bx = bottle.x, bw = bottle.w, bh = bottle.h;
+      const topY = H - 30 - bh;
+      ctx.save();
+      // neck
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.fillRect(bx - bw*0.18, topY - 12, bw*0.36, 14);
+      // body
+      const grad = ctx.createLinearGradient(bx - bw/2, topY, bx + bw/2, topY + bh);
+      grad.addColorStop(0, 'rgba(255,255,255,0.95)');
+      grad.addColorStop(1, 'rgba(200,230,255,0.85)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      const r = 12;
+      ctx.moveTo(bx - bw/2 + r, topY);
+      ctx.arcTo(bx + bw/2, topY, bx + bw/2, topY + bh, r);
+      ctx.arcTo(bx + bw/2, topY + bh, bx - bw/2, topY + bh, r);
+      ctx.arcTo(bx - bw/2, topY + bh, bx - bw/2, topY, r);
+      ctx.arcTo(bx - bw/2, topY, bx + bw/2, topY, r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(15,79,138,0.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+      return { topY, bw, bh };
+    }
+
+    function drawDrop(d){
+      ctx.save();
+      ctx.fillStyle = d.bad ? 'rgba(120,90,60,0.9)' : 'rgba(180,220,255,0.95)';
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(d.x - d.r*0.6, d.y - d.r*0.5);
+      ctx.quadraticCurveTo(d.x, d.y - d.r*3, d.x + d.r*0.6, d.y - d.r*0.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function loseLife(){
+      lives--;
+      livesCountEl.textContent = '❤'.repeat(Math.max(lives,0)) + '🤍'.repeat(Math.max(3-lives,0));
+      if(lives <= 0){
+        endGame();
+      }
+    }
+
+    function endGame(){
+      running = false;
+      cancelAnimationFrame(rafId);
+      endSub.textContent = 'You caught ' + score + ' clean drop' + (score===1?'':'s') + '.';
+      endOverlay.classList.remove('hidden');
+    }
+
+    function update(){
+      elapsedFrames++;
+      spawnTimer++;
+      const curInterval = Math.max(30, spawnInterval - elapsedFrames/25);
+      if(spawnTimer > curInterval){
+        spawnTimer = 0;
+        spawnDrop();
+      }
+
+      const bottleInfo = { topY: H - 30 - bottle.h, bw: bottle.w, bh: bottle.h };
+
+      for(let i = drops.length - 1; i >= 0; i--){
+        const d = drops[i];
+        d.y += d.speed;
+
+        const caughtX = Math.abs(d.x - bottle.x) < bottle.w/2;
+        const caughtY = d.y + d.r > bottleInfo.topY && d.y - d.r < bottleInfo.topY + bottleInfo.bh;
+
+        if(caughtX && caughtY){
+          if(d.bad){
+            loseLife();
+          } else {
+            score++;
+            scoreCountEl.textContent = score;
+          }
+          drops.splice(i, 1);
+          continue;
+        }
+
+        if(d.y - d.r > H){
+          if(!d.bad){
+            loseLife();
+          }
+          drops.splice(i, 1);
+        }
+      }
+    }
+
+    function draw(){
+      ctx.clearRect(0, 0, W, H);
+      drops.forEach(drawDrop);
+      drawBottle();
+    }
+
+    function loop(){
+      if(!running) return;
+      update();
+      draw();
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function startGame(){
+      resetGame();
+      startOverlay.classList.add('hidden');
+      endOverlay.classList.add('hidden');
+      running = true;
+      loop();
+    }
+
+    // Pointer control: drag anywhere to move bottle to that x
+    function pointerX(evt){
+      const rect = canvas.getBoundingClientRect();
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      return clientX - rect.left;
+    }
+    let dragging = false;
+    canvas.addEventListener('mousedown', (e) => { dragging = true; bottle.x = pointerX(e); });
+    window.addEventListener('mousemove', (e) => { if(dragging) bottle.x = Math.min(Math.max(pointerX(e), bottle.w/2), W - bottle.w/2); });
+    window.addEventListener('mouseup', () => { dragging = false; });
+    canvas.addEventListener('touchstart', (e) => { dragging = true; bottle.x = pointerX(e); }, {passive:true});
+    canvas.addEventListener('touchmove', (e) => { if(dragging) bottle.x = Math.min(Math.max(pointerX(e), bottle.w/2), W - bottle.w/2); }, {passive:true});
+    canvas.addEventListener('touchend', () => { dragging = false; });
+
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
+    window.addEventListener('resize', () => { resize(); draw(); });
+
+    resize();
+    draw();
+  })();
+  </script>
+
+</body>
+</html>

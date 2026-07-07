@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dhew Puzzle — Free Mini Game</title>
+<meta name="description" content="Rearrange the shuffled Dhew logo tiles and solve the puzzle — free, one-tap play.">
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#0a2540;
+    --deep:#06223f;
+    --brand-blue:#0f4f8a;
+    --brand-blue-2:#1c6fb3;
+    --ice:#eaf6ff;
+    --white:#ffffff;
+    --glass-bg: rgba(255,255,255,0.10);
+    --glass-bg-strong: rgba(255,255,255,0.94);
+    --glass-border: rgba(255,255,255,0.35);
+    --shadow-soft: 0 20px 60px rgba(4,20,40,0.45);
+    --shadow-card: 0 30px 80px -10px rgba(4,20,40,0.55), 0 8px 24px rgba(4,20,40,0.35);
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --maxw: 560px;
+    --good:#37d67a;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; width:100%; min-height:100%; }
+  body{
+    font-family:'Poppins', -apple-system, 'Segoe UI', sans-serif;
+    color:var(--white);
+    background-color:#06223f;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  .bg-wrap{ position:fixed; inset:0; z-index:0; overflow:hidden; }
+  .bg-img{
+    position:absolute; inset:0; width:100%; height:100%;
+    background: linear-gradient(160deg, #0a5a9e 0%, #024372 45%, #011e3a 100%);
+    background-color:#024372;
+  }
+  .bg-overlay{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 80% 60% at 25% 30%, rgba(15,90,160,0.22) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 50% at 80% 70%, rgba(1,30,65,0.28) 0%, transparent 65%);
+  }
+  .bg-vignette{ position:absolute; inset:0; box-shadow: inset 0 0 180px 40px rgba(1,12,28,0.45); }
+
+  .page{
+    position:relative; z-index:1; min-height:100vh; width:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    padding:36px 20px 40px;
+  }
+
+  .back-link{
+    align-self:flex-start;
+    display:inline-flex; align-items:center; gap:6px;
+    color:rgba(234,246,255,0.75);
+    text-decoration:none;
+    font-size:13px; font-weight:500;
+    margin-bottom:18px;
+    max-width:var(--maxw);
+    width:100%;
+  }
+  .back-link svg{ width:16px; height:16px; }
+  .back-link:hover{ color:#fff; }
+
+  .header{ text-align:center; max-width:640px; margin-bottom:22px; }
+  .brand-name{
+    font-size:clamp(11px, 3.8vw, 16px);
+    font-weight:500;
+    letter-spacing:0.18em;
+    margin:0;
+    color:rgba(255,255,255,0.72);
+  }
+  .subtitle{
+    font-size:clamp(19px, 4vw, 25px);
+    font-weight:700;
+    letter-spacing:0.01em;
+    margin:8px 0 8px;
+    color:var(--ice);
+  }
+  .lead-text{
+    font-size:clamp(13px, 2vw, 15px);
+    font-weight:300;
+    line-height:1.6;
+    margin:0 auto;
+    max-width:420px;
+    color:rgba(234,246,255,0.85);
+  }
+
+  .card{
+    width:100%;
+    max-width:var(--maxw);
+    background:linear-gradient(165deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius-lg);
+    backdrop-filter:blur(22px) saturate(140%);
+    -webkit-backdrop-filter:blur(22px) saturate(140%);
+    box-shadow:var(--shadow-card);
+    padding:clamp(22px, 5vw, 32px);
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:""; position:absolute; top:-40%; left:-20%; width:70%; height:70%;
+    background:radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%);
+    pointer-events:none;
+  }
+
+  .stat-row{
+    display:flex; justify-content:center; gap:22px;
+    margin-bottom:16px;
+  }
+  .stat{ text-align:center; }
+  .stat .num{ font-size:20px; font-weight:700; color:#fff; display:block; }
+  .stat .lbl{ font-size:11px; font-weight:400; color:rgba(234,246,255,0.65); letter-spacing:0.04em; text-transform:uppercase; }
+
+  .puzzle-wrap{
+    position:relative;
+    width:100%;
+    max-width:400px;
+    aspect-ratio:1 / 1;
+    margin:0 auto;
+    border-radius:var(--radius-md);
+    overflow:hidden;
+    box-shadow:0 14px 40px rgba(2,14,30,0.5), inset 0 0 0 1px rgba(255,255,255,0.25);
+    background:linear-gradient(160deg, #0a5a9e, #011e3a);
+    touch-action: manipulation;
+  }
+  #puzzleCanvas{
+    display:block;
+    width:100%;
+    height:100%;
+    cursor:pointer;
+  }
+
+  .win-banner{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:10px;
+    background:rgba(6,34,63,0.82);
+    backdrop-filter:blur(6px);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.4s ease;
+    text-align:center;
+    padding:20px;
+  }
+  .win-banner.show{ opacity:1; pointer-events:auto; }
+  .win-banner .icon{ font-size:38px; }
+  .win-banner .title{ font-size:20px; font-weight:700; color:#fff; }
+  .win-banner .sub{ font-size:13px; color:rgba(234,246,255,0.85); font-weight:300; }
+
+  .controls{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+  }
+  .btn{
+    flex:1;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:13px 16px;
+    border-radius:var(--radius-md);
+    border:1px solid rgba(255,255,255,0.55);
+    background:linear-gradient(135deg, #ffffff, #f3faff);
+    color:var(--deep);
+    text-decoration:none;
+    font-family:inherit;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 10px 24px rgba(4,18,36,0.28);
+    transition:transform 0.22s ease, box-shadow 0.22s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(4,18,36,0.35); }
+  .btn:active{ transform:translateY(0) scale(0.98); }
+  .btn.ghost{
+    background:rgba(255,255,255,0.10);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.35);
+  }
+  .btn svg{ width:16px; height:16px; }
+
+  .card-note{
+    text-align:center;
+    font-size:12px;
+    font-weight:300;
+    line-height:1.6;
+    color:rgba(234,246,255,0.65);
+    margin:22px 0 0;
+    padding-top:16px;
+    border-top:1px solid rgba(255,255,255,0.18);
+  }
+
+  .footer{
+    margin-top:30px;
+    text-align:center;
+    font-size:12px;
+    font-weight:300;
+    letter-spacing:0.02em;
+    color:rgba(234,246,255,0.55);
+    line-height:1.7;
+  }
+  .footer strong{ font-weight:600; color:rgba(255,255,255,0.8); }
+
+  @media (max-width:480px){
+    .card{ padding:20px 16px 26px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="bg-wrap" aria-hidden="true">
+    <div class="bg-img"></div>
+    <div class="bg-overlay"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <main class="page">
+
+    <a class="back-link" href="games.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Back to games
+    </a>
+
+    <header class="header">
+      <p class="brand-name">DHEW DRINKING WATER</p>
+      <h1 class="subtitle">🧩 Logo Puzzle</h1>
+      <p class="lead-text">Tap two tiles to swap them and rebuild the Dhew logo. Free to play — no download, no login.</p>
+    </header>
+
+    <section class="card" aria-label="Dhew logo sliding puzzle game">
+
+      <div class="stat-row">
+        <div class="stat"><span class="num" id="moveCount">0</span><span class="lbl">Moves</span></div>
+        <div class="stat"><span class="num" id="timeCount">0:00</span><span class="lbl">Time</span></div>
+      </div>
+
+      <div class="puzzle-wrap" id="puzzleWrap">
+        <canvas id="puzzleCanvas" width="600" height="600"></canvas>
+        <div class="win-banner" id="winBanner">
+          <div class="icon">🎉</div>
+          <div class="title">Solved!</div>
+          <div class="sub" id="winSub">You rebuilt the Dhew logo.</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" id="shuffleBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+          New Shuffle
+        </button>
+        <a class="btn ghost" href="games.html">More Games</a>
+      </div>
+
+      <p class="card-note">A little something extra from Dhew — thanks for scanning our QR code!</p>
+
+    </section>
+
+    <footer class="footer">
+      <strong>&copy; Dhew Drinking Water</strong><br>
+      Laboratory Tested Drinking Water
+    </footer>
+
+  </main>
+
+  <script>
+  (function(){
+    const GRID = 3; // 3x3 tiles
+    const canvas = document.getElementById('puzzleCanvas');
+    const ctx = canvas.getContext('2d');
+    const wrap = document.getElementById('puzzleWrap');
+    const winBanner = document.getElementById('winBanner');
+    const winSub = document.getElementById('winSub');
+    const moveCountEl = document.getElementById('moveCount');
+    const timeCountEl = document.getElementById('timeCount');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+
+    let size = 600;
+    let tileSize = size / GRID;
+    let order = [];       // order[i] = which original tile sits at position i
+    let selected = -1;
+    let moves = 0;
+    let startTime = null;
+    let timerInterval = null;
+    let solved = false;
+    let img = new Image();
+    let imgReady = false;
+
+    function resizeCanvas(){
+      const rect = wrap.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      size = rect.width;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      canvas.width = Math.round(size * dpr);
+      canvas.height = Math.round(size * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      tileSize = size / GRID;
+      draw();
+    }
+
+    function shuffledOrder(){
+      let arr = Array.from({length: GRID*GRID}, (_, i) => i);
+      // Fisher-Yates shuffle, retry if solved or too easy (identical to solved with 0-1 swaps)
+      let attempts = 0;
+      do{
+        for(let i = arr.length - 1; i > 0; i--){
+          const j = Math.floor(Math.random() * (i+1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        attempts++;
+      } while(isSolvedArr(arr) && attempts < 20);
+      return arr;
+    }
+
+    function isSolvedArr(arr){
+      for(let i = 0; i < arr.length; i++){
+        if(arr[i] !== i) return false;
+      }
+      return true;
+    }
+
+    function startTimer(){
+      clearInterval(timerInterval);
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const m = Math.floor(elapsed / 60);
+        const s = elapsed % 60;
+        timeCountEl.textContent = m + ':' + String(s).padStart(2, '0');
+      }, 1000);
+    }
+
+    function newGame(){
+      order = shuffledOrder();
+      selected = -1;
+      moves = 0;
+      solved = false;
+      moveCountEl.textContent = '0';
+      timeCountEl.textContent = '0:00';
+      winBanner.classList.remove('show');
+      startTimer();
+      draw();
+    }
+
+    function draw(){
+      ctx.clearRect(0, 0, size, size);
+      const gap = 3;
+      for(let pos = 0; pos < GRID*GRID; pos++){
+        const tileIdx = order[pos];
+        const px = pos % GRID;
+        const py = Math.floor(pos / GRID);
+        const sx = (tileIdx % GRID) * (imgReady ? img.width / GRID : 0);
+        const sy = Math.floor(tileIdx / GRID) * (imgReady ? img.height / GRID : 0);
+        const sw = imgReady ? img.width / GRID : 0;
+        const sh = imgReady ? img.height / GRID : 0;
+
+        const dx = px * tileSize;
+        const dy = py * tileSize;
+
+        // tile background
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(dx + gap/2, dy + gap/2, tileSize - gap, tileSize - gap);
+        ctx.clip();
+
+        // brand gradient background per tile so the white logo lines are visible
+        const grad = ctx.createLinearGradient(dx, dy, dx + tileSize, dy + tileSize);
+        grad.addColorStop(0, '#0a5a9e');
+        grad.addColorStop(1, '#011e3a');
+        ctx.fillStyle = grad;
+        ctx.fillRect(dx, dy, tileSize, tileSize);
+
+        if(imgReady){
+          // draw the sub-image (source tile) into this board position
+          ctx.drawImage(img, sx, sy, sw, sh, dx, dy, tileSize, tileSize);
+        }
+        ctx.restore();
+
+        // border
+        ctx.strokeStyle = selected === pos ? '#ffffff' : 'rgba(255,255,255,0.18)';
+        ctx.lineWidth = selected === pos ? 3 : 1;
+        ctx.strokeRect(dx + gap/2, dy + gap/2, tileSize - gap, tileSize - gap);
+
+        // tile number badge (small helper, subtle)
+        ctx.font = '600 11px Poppins, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.fillText(tileIdx + 1, dx + 8, dy + 16);
+      }
+    }
+
+    function posFromEvent(evt){
+      const rect = canvas.getBoundingClientRect();
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const px = Math.floor(x / tileSize);
+      const py = Math.floor(y / tileSize);
+      if(px < 0 || px >= GRID || py < 0 || py >= GRID) return -1;
+      return py * GRID + px;
+    }
+
+    function handleTap(evt){
+      if(solved) return;
+      evt.preventDefault();
+      const pos = posFromEvent(evt);
+      if(pos === -1) return;
+
+      if(selected === -1){
+        selected = pos;
+        draw();
+        return;
+      }
+      if(selected === pos){
+        selected = -1;
+        draw();
+        return;
+      }
+      // swap
+      [order[selected], order[pos]] = [order[pos], order[selected]];
+      moves++;
+      moveCountEl.textContent = moves;
+      selected = -1;
+      draw();
+
+      if(isSolvedArr(order)){
+        solved = true;
+        clearInterval(timerInterval);
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const m = Math.floor(elapsed / 60);
+        const s = elapsed % 60;
+        winSub.textContent = 'Solved in ' + moves + ' moves, ' + m + ':' + String(s).padStart(2,'0') + '.';
+        winBanner.classList.add('show');
+      }
+    }
+
+    canvas.addEventListener('click', handleTap);
+    canvas.addEventListener('touchstart', handleTap, { passive: false });
+    shuffleBtn.addEventListener('click', newGame);
+    window.addEventListener('resize', resizeCanvas);
+
+    img.onload = function(){
+      imgReady = true;
+      resizeCanvas();
+    };
+    img.onerror = function(){
+      imgReady = false;
+      resizeCanvas();
+    };
+    img.src = 'dhew-logo.png';
+
+    resizeCanvas();
+    newGame();
+  })();
+  </script>
+
+</body>
+</html>

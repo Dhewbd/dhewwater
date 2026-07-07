@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Reports — Dhew Drinking Water</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #024372;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Top bar */
+  .topbar {
+    background: rgba(1, 30, 55, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+  }
+  .brand-name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #ffffff;
+  }
+  .brand-sub {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(234,246,255,0.70);
+    letter-spacing: 0.03em;
+  }
+
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.28);
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  .download-btn:hover {
+    background: rgba(255,255,255,0.20);
+  }
+  .download-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* PDF viewer area */
+  .viewer-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 32px;
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 40%, rgba(15,79,138,0.18) 0%, rgba(2,30,58,0.0) 70%);
+  }
+
+  .viewer-label {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(234,246,255,0.55);
+    margin-bottom: 16px;
+  }
+
+  .pdf-frame-wrap {
+    width: 100%;
+    max-width: 860px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.10),
+      0 24px 64px rgba(1,15,32,0.55);
+    background: #fff;
+    flex: 1;
+  }
+
+  iframe {
+    width: 100%;
+    height: 85vh;
+    border: none;
+    display: block;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 18px 16px;
+    font-size: 11.5px;
+    font-weight: 300;
+    color: rgba(234,246,255,0.45);
+    letter-spacing: 0.02em;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .footer strong {
+    font-weight: 500;
+    color: rgba(255,255,255,0.65);
+  }
+
+  @media (max-width: 480px) {
+    .topbar { padding: 12px 16px; }
+    iframe { height: 78vh; }
+    .viewer-wrap { padding: 18px 10px 24px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="brand-name">DHEW DRINKING WATER</span>
+      <span class="brand-sub">Official Laboratory Test Reports</span>
+    </div>
+    <a class="download-btn" href="reports/test-reports.pdf" download="Dhew-Water-Test-Reports.pdf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download PDF
+    </a>
+  </div>
+
+  <div class="viewer-wrap">
+    <div class="viewer-label">icddr,b Laboratory Analysis</div>
+    <div class="pdf-frame-wrap" id="pdfWrap">
+      <iframe
+        id="pdfFrame"
+        src="reports/test-reports.pdf"
+        title="Dhew Drinking Water — Laboratory Test Reports"
+        loading="lazy">
+      </iframe>
+    </div>
+  </div>
+
+  <script>
+    // On mobile, iframe PDF doesn't work — open PDF directly instead
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    }
+    if (isMobile()) {
+      window.location.href = 'reports/test-reports.pdf';
+    }
+  </script>
+
+  <div class="footer">
+    <strong>© Dhew Drinking Water</strong> &nbsp;·&nbsp; Laboratory Tested Drinking Water
+  </div>
+
+</body>
+</html>
